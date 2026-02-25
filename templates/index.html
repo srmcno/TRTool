@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CNO Tribal Reclamation &amp; Land Intelligence Tool</title>
+
+  <!-- Leaflet CSS (local) -->
+  <link rel="stylesheet" href="/static/vendor/leaflet.css"/>
+  <!-- Leaflet MarkerCluster CSS (local) -->
+  <link rel="stylesheet" href="/static/vendor/MarkerCluster.css"/>
+  <link rel="stylesheet" href="/static/vendor/MarkerCluster.Default.css"/>
+  <!-- Font Awesome 6 (local) -->
+  <link rel="stylesheet" href="/static/vendor/fa-all.min.css"/>
+
+  <!-- Brand stylesheet -->
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-left">
+
+    <!-- CNO Great Seal SVG -->
+    <!-- Design per brand standards: unstrung bow, three arrows, pipe-hatchet,
+         "The Great Seal of the Choctaw Nation" around the edge -->
+    <div class="seal-wrap">
+      <svg class="cno-seal" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg"
+           aria-label="The Great Seal of the Choctaw Nation">
+        <!-- Outer decorative ring -->
+        <circle cx="70" cy="70" r="66" fill="#1e0800" stroke="#C9A904" stroke-width="3"/>
+        <circle cx="70" cy="70" r="59" fill="none" stroke="#C9A904" stroke-width="0.7" stroke-dasharray="3,3"/>
+        <!-- Circular seal text -->
+        <defs>
+          <path id="sealText"
+                d="M 70,70 m -56,0 a 56,56 0 1,1 112,0 a 56,56 0 1,1 -112,0"/>
+        </defs>
+        <text font-family="Trebuchet MS,Arial,sans-serif" font-size="7.2"
+              fill="#C9A904" letter-spacing="1.6" font-weight="bold">
+          <textPath href="#sealText" startOffset="2%">
+            THE GREAT SEAL OF THE CHOCTAW NATION  ✦
+          </textPath>
+        </text>
+
+        <!-- Six-pointed star (Great Seal center) -->
+        <polygon points="70,18 73,27 82,27 75,33 78,42 70,37 62,42 65,33 58,27 67,27"
+                 fill="#C9A904" opacity="0.95"/>
+
+        <!-- Unstrung / partially braced bow  -->
+        <!-- Bow stave (arc = the wooden part) -->
+        <path d="M 44,104 C 38,80 38,58 44,36"
+              stroke="#C9A904" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 96,104 C 102,80 102,58 96,36"
+              stroke="#C9A904" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Bow string (slack = unstrung / partially braced) -->
+        <path d="M 44,36 Q 70,54 96,36"
+              stroke="#C9A904" stroke-width="1.4" fill="none"
+              stroke-dasharray="2.5,2" opacity="0.8"/>
+        <path d="M 44,104 Q 70,86 96,104"
+              stroke="#C9A904" stroke-width="1.4" fill="none"
+              stroke-dasharray="2.5,2" opacity="0.8"/>
+
+        <!-- Three arrows (representing the three district chiefs:
+             Pushmataha, Mushulatubbe, Apukshunabbe) -->
+        <!-- Arrow 1 (left — diagonal) -->
+        <line x1="54" y1="88" x2="60" y2="52"
+              stroke="#C9A904" stroke-width="1.8" stroke-linecap="round"/>
+        <polygon points="60,52 55,61 63,59" fill="#C9A904"/>
+        <line x1="54" y1="88" x2="56" y2="91" stroke="#C9A904" stroke-width="2"/>
+        <!-- Arrow 2 (center — vertical) -->
+        <line x1="70" y1="90" x2="70" y2="52"
+              stroke="#C9A904" stroke-width="1.8" stroke-linecap="round"/>
+        <polygon points="70,52 66,61 74,61" fill="#C9A904"/>
+        <line x1="70" y1="90" x2="70" y2="93" stroke="#C9A904" stroke-width="2"/>
+        <!-- Arrow 3 (right — diagonal) -->
+        <line x1="86" y1="88" x2="80" y2="52"
+              stroke="#C9A904" stroke-width="1.8" stroke-linecap="round"/>
+        <polygon points="80,52 77,61 85,59" fill="#C9A904"/>
+        <line x1="86" y1="88" x2="84" y2="91" stroke="#C9A904" stroke-width="2"/>
+
+        <!-- Pipe-hatchet (tomahawk / calumet — history, tradition,
+             solemn deliberation) -->
+        <!-- Handle -->
+        <rect x="63" y="92" width="24" height="3.5" fill="#C9A904" rx="1.5"/>
+        <!-- Axe head -->
+        <path d="M 67,88 L 68,95 Q 61,95 61,91.5 Q 61,88 67,88 Z" fill="#C9A904"/>
+        <!-- Pipe bowl -->
+        <rect x="85" y="89" width="5" height="4" rx="1" fill="#C9A904" opacity="0.85"/>
+        <circle cx="63" cy="89.5" r="2" fill="#1e0800" stroke="#C9A904" stroke-width="0.8"/>
+      </svg>
+    </div><!-- /seal-wrap -->
+
+    <!-- Title block -->
+    <div class="header-titles">
+      <div class="org-breadcrumb">
+        <span class="div-name">Division of Legal &amp; Compliance</span>
+        <span class="bc-sep">›</span>
+        <span class="dept-name">Dept. of Natural Resources</span>
+        <span class="bc-sep">›</span>
+        <span class="dept-name">Environmental Protective Services</span>
+      </div>
+      <h1 class="tool-title">
+        <span class="nation-word">Choctaw Nation</span>
+        <span class="tool-word">Tribal Reclamation &amp; Land Intelligence Tool</span>
+      </h1>
+    </div>
+  </div><!-- /header-left -->
+
+  <div class="header-right">
+    <button class="hdr-btn" id="btn-print" title="Print map">
+      <i class="fa fa-print"></i> Print
+    </button>
+    <button class="hdr-btn" id="btn-help" title="Help">
+      <i class="fa fa-circle-question"></i> Help
+    </button>
+  </div>
+</header><!-- /app-header -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BODY  (sidebar + map + info panel)
+═══════════════════════════════════════════════════════════════ -->
+<div class="app-body">
+
+  <!-- ─── SIDEBAR ─────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Collapse toggle -->
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Collapse sidebar">
+      <i class="fa fa-chevron-left" id="toggle-icon"></i>
+    </button>
+
+    <!-- Basemap selector -->
+    <div class="sb-section">
+      <h3 class="sb-title"><i class="fa fa-map"></i> Base Map</h3>
+      <div class="basemap-row">
+        <button class="bm-btn active" data-bm="osm">Streets</button>
+        <button class="bm-btn" data-bm="satellite">Satellite</button>
+        <button class="bm-btn" data-bm="topo">Topographic</button>
+      </div>
+    </div>
+
+    <!-- ── Layer groups ──────────────────────────────── -->
+    <div class="sb-section">
+      <h3 class="sb-title"><i class="fa fa-layer-group"></i> Map Layers</h3>
+
+      <!-- TRIBAL LANDS -->
+      <div class="lg" data-group="tribal">
+        <div class="lg-hdr" onclick="toggleGroup('tribal')">
+          <span class="lg-dot" style="background:#421400;border:2px solid #C9A904;"></span>
+          <span class="lg-label">Tribal Lands</span>
+          <i class="fa fa-chevron-down lg-chev open" id="chev-tribal"></i>
+        </div>
+        <div class="lg-body open" id="lgb-tribal">
+          <div class="li" data-layer="cno_boundary">
+            <label class="sw"><input type="checkbox" id="chk-cno_boundary" checked><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">CNO Reservation Boundary</span>
+              <span class="li-stat loading" id="stat-cno_boundary">Loading…</span>
+            </div>
+            <span class="li-swatch" style="border:3px dashed #421400;background:transparent;"></span>
+          </div>
+          <div class="li" data-layer="bia_trust">
+            <label class="sw"><input type="checkbox" id="chk-bia_trust" checked><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">BIA Trust / Restricted Land</span>
+              <span class="li-stat loading" id="stat-bia_trust">Loading…</span>
+            </div>
+            <span class="li-swatch" style="background:#C9A904;border:2px solid #9A7E00;"></span>
+          </div>
+        </div>
+      </div><!-- /tribal -->
+
+      <!-- FEDERAL LANDS -->
+      <div class="lg" data-group="federal">
+        <div class="lg-hdr" onclick="toggleGroup('federal')">
+          <span class="lg-dot" style="background:#009ADA;"></span>
+          <span class="lg-label">Federal Lands</span>
+          <i class="fa fa-chevron-down lg-chev open" id="chev-federal"></i>
+        </div>
+        <div class="lg-body open" id="lgb-federal">
+          <div class="li" data-layer="usfs">
+            <label class="sw"><input type="checkbox" id="chk-usfs"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">USFS Ouachita Nat'l Forest</span>
+              <span class="li-stat" id="stat-usfs">—</span>
+            </div>
+            <span class="li-swatch" style="background:#00853E;border:2px solid #005A2A;"></span>
+          </div>
+          <div class="li" data-layer="usace_reservoirs">
+            <label class="sw"><input type="checkbox" id="chk-usace_reservoirs"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">USACE Corps Reservoirs</span>
+              <span class="li-stat" id="stat-usace_reservoirs">—</span>
+            </div>
+            <span class="li-swatch" style="background:#009ADA;border:2px solid #006A99;"></span>
+          </div>
+          <div class="li" data-layer="federal_nwr">
+            <label class="sw"><input type="checkbox" id="chk-federal_nwr"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">Federal NWRs (USFWS)</span>
+              <span class="li-stat" id="stat-federal_nwr">—</span>
+            </div>
+            <span class="li-swatch" style="background:#5BB5E0;border:2px solid #3A95C0;"></span>
+          </div>
+        </div>
+      </div><!-- /federal -->
+
+      <!-- STATE LANDS -->
+      <div class="lg" data-group="state">
+        <div class="lg-hdr" onclick="toggleGroup('state')">
+          <span class="lg-dot" style="background:#4A9E6B;"></span>
+          <span class="lg-label">State Lands</span>
+          <i class="fa fa-chevron-down lg-chev" id="chev-state"></i>
+        </div>
+        <div class="lg-body" id="lgb-state">
+          <div class="li" data-layer="state_wma">
+            <label class="sw"><input type="checkbox" id="chk-state_wma"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">State WMAs (ODWC)</span>
+              <span class="li-stat" id="stat-state_wma">—</span>
+            </div>
+            <span class="li-swatch" style="background:#4A9E6B;border:2px solid #2A7E4B;"></span>
+          </div>
+        </div>
+      </div><!-- /state -->
+
+      <!-- CONTAMINATED SITES -->
+      <div class="lg" data-group="contam">
+        <div class="lg-hdr" onclick="toggleGroup('contam')">
+          <span class="lg-dot" style="background:#EF373E;"></span>
+          <span class="lg-label">Contaminated Sites</span>
+          <i class="fa fa-chevron-down lg-chev open" id="chev-contam"></i>
+        </div>
+        <div class="lg-body open" id="lgb-contam">
+          <div class="li" data-layer="deq_brownfields">
+            <label class="sw"><input type="checkbox" id="chk-deq_brownfields"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">DEQ Brownfields</span>
+              <span class="li-stat" id="stat-deq_brownfields">—</span>
+            </div>
+            <span class="li-swatch" style="background:#C9A904;border:2px solid #421400;"></span>
+          </div>
+          <div class="li" data-layer="deq_superfund">
+            <label class="sw"><input type="checkbox" id="chk-deq_superfund"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">DEQ Superfund / NPL</span>
+              <span class="li-stat" id="stat-deq_superfund">—</span>
+            </div>
+            <span class="li-swatch" style="background:#EF373E;border:2px solid #C0002A;"></span>
+          </div>
+          <div class="li" data-layer="deq_vcp">
+            <label class="sw"><input type="checkbox" id="chk-deq_vcp"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">DEQ Voluntary Cleanup (VCP)</span>
+              <span class="li-stat" id="stat-deq_vcp">—</span>
+            </div>
+            <span class="li-swatch" style="background:#421400;border:2px solid #210A00;"></span>
+          </div>
+          <div class="li" data-layer="epa_cimc">
+            <label class="sw"><input type="checkbox" id="chk-epa_cimc"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">EPA CIMC Cleanups</span>
+              <span class="li-stat" id="stat-epa_cimc">—</span>
+            </div>
+            <span class="li-swatch" style="background:#87674F;border:2px solid #5A3D27;"></span>
+          </div>
+        </div>
+      </div><!-- /contam -->
+
+      <!-- SHORELINE ZONES -->
+      <div class="lg" data-group="shore">
+        <div class="lg-hdr" onclick="toggleGroup('shore')">
+          <span class="lg-dot" style="background:#009ADA;border:2px solid #5BB5E0;"></span>
+          <span class="lg-label">Shoreline Zones</span>
+          <i class="fa fa-chevron-down lg-chev" id="chev-shore"></i>
+        </div>
+        <div class="lg-body" id="lgb-shore">
+          <div class="li" data-layer="shoreline_zones">
+            <label class="sw"><input type="checkbox" id="chk-shoreline_zones"><span class="sw-knob"></span></label>
+            <div class="li-info">
+              <span class="li-name">USACE Shoreline Management</span>
+              <span class="li-stat" id="stat-shoreline_zones">—</span>
+            </div>
+            <span class="li-swatch"
+                  style="background:linear-gradient(135deg,#009ADA,#5BB5E0);border:2px solid #007AB0;">
+            </span>
+          </div>
+          <!-- Shoreline zone sub-legend (shown when layer is on) -->
+          <div class="shore-legend" id="shore-legend">
+            <div class="sz-row"><span class="sz-dot" style="background:#C00000;"></span>Restricted / Prohibited</div>
+            <div class="sz-row"><span class="sz-dot" style="background:#FF6600;"></span>Recreation — High Density</div>
+            <div class="sz-row"><span class="sz-dot" style="background:#FFCC00;"></span>Recreation — Low Density</div>
+            <div class="sz-row"><span class="sz-dot" style="background:#00853E;"></span>Natural / Environmental</div>
+            <div class="sz-row"><span class="sz-dot" style="background:#4A9E6B;"></span>Multiple Resource Mgmt</div>
+            <div class="sz-row"><span class="sz-dot" style="background:#009ADA;"></span>Project / Other</div>
+          </div>
+        </div>
+      </div><!-- /shore -->
+
+    </div><!-- /layer groups section -->
+
+    <!-- ── Statistics panel ──────────────────────────────── -->
+    <div class="sb-section">
+      <h3 class="sb-title"><i class="fa fa-chart-bar"></i> Reclamation Summary</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="sv-trust">—</div>
+          <div class="stat-lbl">Trust Acres (BIA)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="sv-brown">—</div>
+          <div class="stat-lbl">Brownfield Sites</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="sv-super">—</div>
+          <div class="stat-lbl">Superfund / NPL</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="sv-res">—</div>
+          <div class="stat-lbl">USACE Reservoirs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Fee-to-Trust process ──────────────────────────── -->
+    <div class="sb-section">
+      <h3 class="sb-title"><i class="fa fa-file-lines"></i> Fee-to-Trust Steps</h3>
+      <div class="ftt-steps">
+        <div class="ftt-step"><span class="ftt-num">1</span>Identify target parcels</div>
+        <div class="ftt-step"><span class="ftt-num">2</span>Phase I ESA (ASTM E1527-21)</div>
+        <div class="ftt-step"><span class="ftt-num">3</span>BIA application + tribal resolution</div>
+        <div class="ftt-step"><span class="ftt-num">4</span>Title search + NEPA review</div>
+        <div class="ftt-step"><span class="ftt-num">5</span>BIA Notice of Decision</div>
+        <div class="ftt-step"><span class="ftt-num">6</span>30-day comment period → Trust</div>
+      </div>
+    </div>
+
+    <!-- ── Data sources ──────────────────────────────────── -->
+    <div class="sb-section sb-footer">
+      <p>
+        Data: US Census TIGERweb · BIA AIAN-LAR · USFS EDW ·
+        USACE · USFWS · ODWC · OK DEQ · EPA · Feb 2026
+      </p>
+      <p>25 CFR Part 151 (updated Jan 2024)</p>
+    </div>
+
+  </aside><!-- /sidebar -->
+
+
+  <!-- ─── MAP CONTAINER ────────────────────────────────────────── -->
+  <main class="map-wrap" id="map-wrap">
+
+    <div id="map"></div>
+
+    <!-- Loading overlay -->
+    <div class="load-overlay" id="load-overlay">
+      <div class="load-box">
+        <!-- Animated seal for loading -->
+        <svg class="load-seal" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="57" fill="#2a0d00" stroke="#C9A904" stroke-width="2"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#C9A904" stroke-width="0.6" stroke-dasharray="3,4"/>
+          <polygon points="60,22 63,31 73,31 65,37 68,46 60,40 52,46 55,37 47,31 57,31"
+                   fill="#C9A904"/>
+          <path d="M 36,88 C 30,68 30,52 36,32"
+                stroke="#C9A904" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M 84,88 C 90,68 90,52 84,32"
+                stroke="#C9A904" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M 36,32 Q 60,48 84,32" stroke="#C9A904" stroke-width="1.2"
+                fill="none" stroke-dasharray="2,2"/>
+          <line x1="47" y1="75" x2="52" y2="46" stroke="#C9A904" stroke-width="1.6"/>
+          <polygon points="52,46 47,54 56,52" fill="#C9A904"/>
+          <line x1="60" y1="77" x2="60" y2="46" stroke="#C9A904" stroke-width="1.6"/>
+          <polygon points="60,46 56,54 64,54" fill="#C9A904"/>
+          <line x1="73" y1="75" x2="68" y2="46" stroke="#C9A904" stroke-width="1.6"/>
+          <polygon points="68,46 64,54 72,52" fill="#C9A904"/>
+        </svg>
+        <div class="load-title">Choctaw Nation</div>
+        <div class="load-sub">Loading map data…</div>
+        <div class="load-bar-wrap">
+          <div class="load-bar" id="load-bar"></div>
+        </div>
+        <div class="load-detail" id="load-detail">Initializing…</div>
+      </div>
+    </div><!-- /load-overlay -->
+
+    <!-- Coordinates readout -->
+    <div class="coords-box" id="coords-box">
+      <i class="fa fa-crosshairs"></i> Hover map for coordinates
+    </div>
+
+  </main><!-- /map-wrap -->
+
+
+  <!-- ─── FEATURE INFO PANEL ───────────────────────────────────── -->
+  <aside class="info-panel" id="info-panel">
+    <div class="ip-head">
+      <h3 class="ip-title" id="ip-title">Feature Details</h3>
+      <button class="ip-close" onclick="closeInfoPanel()" title="Close">
+        <i class="fa fa-xmark"></i>
+      </button>
+    </div>
+    <div class="ip-body" id="ip-body">
+      <p class="ip-hint"><i class="fa fa-hand-pointer"></i> Click a map feature to view details</p>
+    </div>
+  </aside>
+
+</div><!-- /app-body -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STATUS BAR
+═══════════════════════════════════════════════════════════════ -->
+<footer class="status-bar">
+  <span id="status-msg"><i class="fa fa-circle-notch fa-spin"></i> Loading layers…</span>
+  <span class="sb-sep">|</span>
+  <span>ODWC · USFWS · Census · BIA · USFS · USACE · OK DEQ · EPA</span>
+  <span class="sb-sep">|</span>
+  <span>Choctaw Nation of Oklahoma — Environmental Protective Services</span>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════════════ -->
+<script src="/static/vendor/leaflet.js"></script>
+<script src="/static/vendor/leaflet.markercluster.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
